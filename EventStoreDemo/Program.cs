@@ -22,7 +22,9 @@ List<IEvent> eventsToRun = new List<IEvent>
 {
     new AccountCreatedEvent(aggregateId, "Bhavana Shrotri"),
     new FundsDepositedEvent(aggregateId, 100000),
-    new FundsWithdrawedEvent(aggregateId, 50000)
+    new FundsWithdrawedEvent(aggregateId, 50000),
+    new FundsDepositedEvent(aggregateId, 1000),
+    new FundsWithdrawedEvent(aggregateId, 20000),
 };
 
 foreach (var item in eventsToRun)
@@ -57,7 +59,7 @@ foreach (var eve in ResultData)
         var state = JsonConvert.DeserializeObject<FundsDepositedEvent>(jsonData);
         bankAccount.Apply(state);
     }
-    else if(eve.Event.EventType == "FundsWithdrawedEvent")
+    else if (eve.Event.EventType == "FundsWithdrawedEvent")
     {
         var state = JsonConvert.DeserializeObject<FundsWithdrawedEvent>(jsonData);
         bankAccount.Apply(state);
