@@ -33,11 +33,36 @@ foreach (var item in eventsToRun)
     await client.AppendToStreamAsync(StreamId(aggregateId), StreamState.Any, new[] { eventStoreDataType });
 }
 
-var result = client.ReadStreamAsync(
+var results = client.ReadStreamAsync(
     Direction.Forwards,
-    "some-stream",
-    EventStore.ClientAPI.StreamPosition.Start);
+    StreamId(aggregateId),
+    StreamPosition.Start);
 
-Console.WriteLine(result);
 
+var ResultData = await results.ToListAsync();
+
+BankAccount bankAccount = new BankAccount();
+
+foreach (var eve in ResultData)
+{
+    var jsonData = Encoding.UTF8.GetString(eve.Event.Data.ToArray());
+
+    if (eve.Event.EventType == "AccountCreatedEvent")
+    {
+        var state = JsonConvert.DeserializeObject<AccountCreatedEvent>(jsonData);
+        bankAccount.Apply(state);
+    }
+    else if (eve.Event.EventType == "FundsDepositedEvent")
+    {
+        var state = JsonConvert.DeserializeObject<FundsDepositedEvent>(jsonData);
+        bankAccount.Apply(state);
+    }
+    else if(eve.Event.EventType == "FundsWithdrawedEvent")
+    {
+        var state = JsonConvert.DeserializeObject<FundsWithdrawedEvent>(jsonData);
+        bankAccount.Apply(state);
+    }
+}
+
+Console.WriteLine($"Current Balance : {bankAccount.CurrentBalance}");
 Console.ReadLine();
