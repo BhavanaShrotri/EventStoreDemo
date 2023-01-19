@@ -1,6 +1,6 @@
 ﻿namespace EventStoreDemo
 {
-    public class IEvent
+    public interface IEvent
     {
         public Guid Id { get; }
     }
@@ -22,7 +22,7 @@
         public Guid Id { get; private set; }
         public Decimal Amount { get; private set; }
 
-       public FundsDepositedEvent(Guid id, Decimal amount)
+        public FundsDepositedEvent(Guid id, Decimal amount)
         {
             Id = id;
             Amount = amount;
