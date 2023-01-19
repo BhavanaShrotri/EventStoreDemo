@@ -17,14 +17,14 @@ namespace EventStoreDemo
 
         public void Apply(FundsDepositedEvent @event)
         {
-            var fundsDepositedTransaction = new Transaction { Id = @event.Id , Ammount = @event.Amount};
+            var fundsDepositedTransaction = new Transaction(@event.Id,@event.Amount);
             Transactions.Add(fundsDepositedTransaction);
             CurrentBalance = CurrentBalance + @event.Amount;
         }
 
         public void Apply(FundsWithdrawedEvent @event)
         {
-            var fundsWithdrawTransaction = new Transaction { Id = @event.Id, Ammount = @event.Amount };
+            var fundsWithdrawTransaction = new Transaction(@event.Id, @event.Amount);
             Transactions.Add(fundsWithdrawTransaction);
             CurrentBalance = CurrentBalance - @event.Amount;
         }
@@ -34,5 +34,10 @@ namespace EventStoreDemo
     {
         public Guid Id { get; set; }
         public Decimal Ammount { get; set; }
+        public Transaction(Guid id, decimal ammount)
+        {
+            Id = id;
+            Ammount = ammount;
+        }
     }
 }
