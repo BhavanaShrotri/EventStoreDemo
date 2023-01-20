@@ -16,71 +16,89 @@ var settings = EventStoreClientSettings
 
 var client = new EventStoreClient(settings);
 
-
-
 int key;
 do
 {
     Console.WriteLine("1 : Create Account");
-    Console.WriteLine("2 : Deposit Funds");
-    Console.WriteLine("3 : Withdrw Funds");
-    Console.WriteLine("4 : Get Account Details");
-    Console.WriteLine("5 : Exit ");
+    Console.WriteLine("2 : Funds Transactions");
+    Console.WriteLine("3 : Get Account Details");
+    Console.WriteLine("4 : Exit ");
     var val = Console.ReadLine();
     key = Convert.ToInt32(val);
+
+    Console.Write("Enter Account Number :");
+    var accountNumber = Convert.ToInt32(Console.ReadLine());
 
     switch (key)
     {
         case 1:
-            await CreateAccount();
+            Console.Write("Enter Name : ");
+            var name = Console.ReadLine();
+            await CreateAccount(accountNumber, name);
             break;
         case 2:
-            await DepositFunds();
+            Console.WriteLine("1 : Deposit Funds");
+            Console.WriteLine("2 : Withdrw Funds");
+            var choice = Convert.ToInt32(Console.ReadLine());
+            Console.Write("Enter Amount : ");
+            var amount = Convert.ToInt32(Console.ReadLine());
+            switch (choice)
+            {
+                case 1:
+                    await DepositFunds(accountNumber, amount);
+                    break;
+                case 2:
+                    await WithdrawFunds(accountNumber, amount);
+                    break;
+            }
             break;
         case 3:
-            await WithdrawFunds();
-            break;
-        case 4:
-            Console.WriteLine("Enter Account Number :");
-            var accountNumber = Console.ReadLine();
-            var accountDetails = await GetAccountDetails(Convert.ToInt32(accountNumber));
+            var accountDetails = await GetAccountDetails(accountNumber);
             Console.WriteLine($"Name : {accountDetails.Name}");
             Console.WriteLine($"Balance : {accountDetails.CurrentBalance}");
             break;
-        case 5: break;
+        case 4: break;
     }
-} while (key != 5);
+} while (key != 4);
 
-async Task CreateAccount()
+async Task CreateAccount(int accountNumber, string name)
 {
-    Console.WriteLine("Enter Account Number :");
-    var accountNumber = Console.ReadLine();
-    Console.WriteLine("Enter Name : ");
-    var name = Console.ReadLine();
-    await AppendEventToString(new AccountCreatedEvent(Convert.ToInt32(accountNumber), name),
-        StreamId(Convert.ToInt32(accountNumber)));
+    await AppendEventToString(new AccountCreatedEvent(accountNumber, name),
+        StreamId(accountNumber));
 }
 
-async Task DepositFunds()
+async Task DepositFunds(int accountNumber, int amount)
 {
-    Console.WriteLine("Enter Account Number :");
-    var accountNumber = Console.ReadLine();
-    Console.WriteLine("Enter Ammount : ");
-    var ammount = Console.ReadLine();
-    await AppendEventToString(
-        new FundsDepositedEvent(Convert.ToInt32(accountNumber), Convert.ToInt32(ammount)),
-        StreamId(Convert.ToInt32(accountNumber)));
+    if (await AccountExists(accountNumber))
+    {
+        await AppendEventToString(
+            new FundsDepositedEvent(accountNumber, amount),
+            StreamId(accountNumber));
+    }
 }
 
-async Task WithdrawFunds()
+async Task WithdrawFunds(int accountNumber, int amount)
 {
-    Console.WriteLine("Enter Account Number :");
-    var accountNumber = Console.ReadLine();
-    Console.WriteLine("Enter Ammount : ");
-    var ammount = Console.ReadLine();
-    await AppendEventToString(
-        new FundsWithdrawedEvent(Convert.ToInt32(accountNumber), Convert.ToInt32(ammount)),
-        StreamId(Convert.ToInt32(accountNumber)));
+    if (await AccountExists(accountNumber))
+    {
+        await AppendEventToString(
+            new FundsWithdrawedEvent(accountNumber, amount),
+            StreamId(accountNumber));
+    }
+}
+
+async Task<bool> AccountExists(int accountNumber)
+{
+    var result = client.ReadStreamAsync(
+    Direction.Forwards,
+    StreamId(accountNumber), StreamPosition.Start, 1);
+
+    if (await result.ReadState == ReadState.StreamNotFound)
+    {
+        Console.Write("Account Not exists");
+        return false;
+    }
+    return true;
 }
 
 async Task<BankAccount> GetAccountDetails(int accountNumber)
@@ -176,6 +194,6 @@ async Task AppendEventToString(IEvent eve, string streamName)
 //    }
 //}
 
-//Console.WriteLine($"Current Balance : {bankAccount.CurrentBalance}");
+//Console.Write($"Current Balance : {bankAccount.CurrentBalance}");
 
 Console.ReadLine();
