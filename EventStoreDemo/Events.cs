@@ -2,41 +2,41 @@
 {
     public interface IEvent
     {
-        public Guid Id { get; }
+        public int AccountNumber { get; }
     }
 
     public class AccountCreatedEvent : IEvent
     {
-        public Guid Id { get; private set; }
+        public int AccountNumber { get; private set; }
         public string Name { get; private set; }
 
-        public AccountCreatedEvent(Guid id, string name)
+        public AccountCreatedEvent(int accountNumber, string name)
         {
-            Id = id;
+            AccountNumber = accountNumber;
             Name = name;
         }
     }
 
     public class FundsDepositedEvent : IEvent
     {
-        public Guid Id { get; private set; }
-        public Decimal Amount { get; private set; }
+        public int AccountNumber { get; private set; }
+        public double Amount { get; private set; }
 
-        public FundsDepositedEvent(Guid id, Decimal amount)
+        public FundsDepositedEvent(int accountNumber, double amount)
         {
-            Id = id;
+            AccountNumber = accountNumber;
             Amount = amount;
         }
     }
 
     public class FundsWithdrawedEvent : IEvent
     {
-        public Guid Id { get; private set; }
-        public Decimal Amount { get; private set; }
+        public int AccountNumber { get; private set; }
+        public double Amount { get; private set; }
 
-        public FundsWithdrawedEvent(Guid id, Decimal amount)
+        public FundsWithdrawedEvent(int accountNumber, double amount)
         {
-            Id = id;
+            AccountNumber = accountNumber;
             Amount = amount;
         }
     }
