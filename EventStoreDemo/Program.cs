@@ -47,6 +47,7 @@ do
             Console.WriteLine($"Name : {accountDetails.Name}");
             Console.WriteLine($"Balance : {accountDetails.CurrentBalance}");
             break;
+        case 5: break;
     }
 } while (key != 5);
 
